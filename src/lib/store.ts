@@ -16,11 +16,6 @@ interface AppState {
   locale: Locale;
   setLocale: (l: Locale) => void;
   t: Dict;
-
-  // Gemini API key (stored locally only)
-  apiKey: string;
-  setApiKey: (k: string) => void;
-  clearApiKey: () => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -38,19 +33,12 @@ export const useAppStore = create<AppState>()(
       locale: "id",
       setLocale: (l) => set({ locale: l }),
       t: translations.id,
-
-      apiKey: "",
-      setApiKey: (k) => set({ apiKey: k.trim() }),
-      clearApiKey: () => set({ apiKey: "" }),
     }),
     {
       name: "florascan-store",
       storage: createJSONStorage(() => localStorage),
-      // Only persist locale + apiKey, derive t each load
-      partialize: (state) => ({
-        locale: state.locale,
-        apiKey: state.apiKey,
-      }),
+      // Persist locale only; derive t each load
+      partialize: (state) => ({ locale: state.locale }),
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.t = translations[state.locale] ?? translations.id;

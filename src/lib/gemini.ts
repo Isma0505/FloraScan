@@ -94,16 +94,15 @@ Locale: {locale}`;
  * Call Gemini 2.5 Flash Lite to identify a plant from a base64 image.
  *
  * @param base64Image - a data URL like "data:image/jpeg;base64,..."
- * @param apiKey - user-provided Gemini API key
  * @param locale - "id" | "en"
  */
 export async function identifyPlant(
   base64Image: string,
-  apiKey: string,
   locale: "id" | "en" = "id"
 ): Promise<PlantResult> {
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) {
-    throw new Error("API_KEY_REQUIRED");
+    throw new Error("GEMINI_API_KEY_MISSING");
   }
 
   const ai = new GoogleGenAI({ apiKey });

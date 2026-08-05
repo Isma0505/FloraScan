@@ -23,7 +23,6 @@ export interface ScanHistoryItem extends PlantResult {
 
 export interface ScanRequest {
   image: string; // base64 data URL
-  apiKey: string;
 }
 
 export interface SaveScanRequest {

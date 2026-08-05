@@ -8,7 +8,7 @@ export const maxDuration = 60;
 
 /**
  * POST /api/scan
- * Body: { image: string (data URL), apiKey: string, locale?: "id"|"en" }
+ * Body: { image: string (data URL), locale?: "id"|"en" }
  * Returns: PlantResult
  */
 export async function POST(req: NextRequest) {
@@ -21,21 +21,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { image, apiKey, locale } = body as {
+    const { image, locale } = body as {
       image?: string;
-      apiKey?: string;
       locale?: "id" | "en";
     };
-
-    if (!apiKey || typeof apiKey !== "string" || apiKey.length < 10) {
-      return NextResponse.json(
-        {
-          error: "API_KEY_REQUIRED",
-          message: "A valid Gemini API key is required.",
-        },
-        { status: 401 }
-      );
-    }
 
     if (!image || !image.startsWith("data:image/")) {
       return NextResponse.json(
@@ -49,7 +38,6 @@ export async function POST(req: NextRequest) {
 
     const result: PlantResult = await identifyPlant(
       optimized,
-      apiKey,
       locale === "en" ? "en" : "id"
     );
 
@@ -57,10 +45,13 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
 
-    if (message === "API_KEY_REQUIRED") {
+    if (message === "GEMINI_API_KEY_MISSING") {
       return NextResponse.json(
-        { error: "API_KEY_REQUIRED", message: "API key missing." },
-        { status: 401 }
+        {
+          error: "CONFIGURATION_ERROR",
+          message: "Server is missing GEMINI_API_KEY.",
+        },
+        { status: 500 }
       );
     }
     if (message === "INVALID_IMAGE_FORMAT") {

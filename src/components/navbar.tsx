@@ -14,8 +14,6 @@ import {
   Sun,
   Moon,
   Globe,
-  KeyRound,
-  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppStore, useT } from "@/lib/store";
@@ -32,7 +30,7 @@ const navItems: { key: View; icon: typeof Home }[] = [
 
 export function Navbar() {
   const t = useT();
-  const { view, setView, locale, setLocale, apiKey } = useAppStore();
+  const { view, setView, locale, setLocale } = useAppStore();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -44,8 +42,6 @@ export function Navbar() {
     const current = resolvedTheme ?? theme;
     setTheme(current === "dark" ? "light" : "dark");
   };
-
-  const hasKey = apiKey.length > 10;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 glass">
@@ -101,27 +97,6 @@ export function Navbar() {
 
         {/* Right controls */}
         <div className="flex items-center gap-1.5">
-          {/* API key status */}
-          <button
-            onClick={() => setView("settings")}
-            className="hidden items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors sm:flex"
-            style={{
-              borderColor: hasKey ? "var(--primary)" : "var(--border)",
-              color: hasKey ? "var(--primary)" : "var(--muted-foreground)",
-              backgroundColor: hasKey ? "color-mix(in oklch, var(--primary) 8%, transparent)" : "transparent",
-            }}
-            title={hasKey ? t.settings.haveKey : t.settings.noKey}
-          >
-            <KeyRound className="h-3.5 w-3.5" />
-            {hasKey ? (
-              <span className="flex items-center gap-1">
-                <Check className="h-3 w-3" /> API
-              </span>
-            ) : (
-              <span>API</span>
-            )}
-          </button>
-
           {/* Language toggle */}
           <button
             onClick={() => setLocale(locale === "id" ? "en" : "id")}
@@ -196,23 +171,6 @@ export function Navbar() {
                   </button>
                 );
               })}
-              <button
-                onClick={() => {
-                  setView("settings");
-                  setMobileOpen(false);
-                }}
-                className={`col-span-full flex items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-xs font-medium sm:col-span-2 ${
-                  hasKey
-                    ? "border-primary/40 text-primary"
-                    : "border-dashed text-muted-foreground"
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  <KeyRound className="h-3.5 w-3.5" />
-                  {hasKey ? t.settings.haveKey : t.settings.noKey}
-                </span>
-                <span className="text-[10px] underline">{t.nav.settings}</span>
-              </button>
             </div>
           </motion.nav>
         )}

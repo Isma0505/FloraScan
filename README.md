@@ -172,10 +172,9 @@ Tampilkan Hasil Lengkap
     managed via isFavorite flag)
 ```
 
-> **Catatan:** Karena aplikasi ini tidak mewajibkan autentikasi server-side
-> (API key Gemini disimpan lokal di browser pengguna), seluruh riwayat
-> disimpan dalam satu tabel `ScanHistory`. Field `isFavorite` membedakan
-> riwayat biasa vs favorit.
+> **Catatan:** Aplikasi ini menggunakan `GEMINI_API_KEY` dari environment
+> server untuk fitur scan. Seluruh riwayat disimpan dalam satu tabel
+> `ScanHistory`. Field `isFavorite` membedakan riwayat biasa vs favorit.
 
 ---
 
@@ -195,8 +194,8 @@ Tampilkan Hasil Lengkap
                     │           │           │           │
               ┌─────┴─────┐     │     ┌─────┴─────┐ ┌───┴────┐
               ▼           ▼     │     ▼           ▼ ▼        ▼
-         ┌────────┐ ┌──────┐   │  Cari  Hapus  Tambah  API Key
-         │ Upload │ │Kamera│   │  Riwayat       Favorit  Theme
+         ┌────────┐ ┌──────┐   │  Cari  Hapus  Tambah  Tema
+         │ Upload │ │Kamera│   │  Riwayat       Favorit  Bahasa
          └────────┘ └──────┘   │                        Language
               │                 │
               ▼                 ▼
@@ -217,12 +216,6 @@ Tampilkan Hasil Lengkap
      │  Mulai  │
      └────┬────┘
           ▼
-   ┌──────────────┐    Tidak ada API Key
-   │ Cek API Key? ├──────────────────► [Arahkan ke Settings]
-   └──────┬───────┘
-          │ Ada
-          ▼
-   ┌──────────────┐
    │ Pilih Sumber │
    │ ┌──────────┐ │
    │ │ Upload   │ │
@@ -287,9 +280,8 @@ POST /api/scan
 **Request Body:**
 ```json
 {
-  "image": "data:image/jpeg;base64,...",   // base64 data URL
-  "apiKey": "AIza...",                     // Gemini API key
-  "locale": "id"                           // "id" | "en" (opsional)
+       "image": "data:image/jpeg;base64,...",   // base64 data URL
+       "locale": "id"                           // "id" | "en" (opsional)
 }
 ```
 
@@ -315,7 +307,8 @@ POST /api/scan
 | Status | Error | Keterangan |
 |--------|-------|-----------|
 | 400 | `INVALID_BODY` / `INVALID_IMAGE` | Body atau gambar tidak valid |
-| 401 | `API_KEY_REQUIRED` / `API_KEY_INVALID` | API key hilang/invalid |
+| 401 | `API_KEY_INVALID` | Konfigurasi Gemini invalid/unauthorized |
+| 500 | `CONFIGURATION_ERROR` | `GEMINI_API_KEY` belum diset di server |
 | 429 | `RATE_LIMITED` | Kuota Gemini tercapai |
 | 500 | `SCAN_FAILED` | Gagal menganalisis |
 
@@ -435,7 +428,7 @@ my-project/
 │   │   ├── scanner-view.tsx       # Upload + Kamera + Analisis
 │   │   ├── scan-result.tsx        # Kartu hasil identifikasi
 │   │   ├── history-view.tsx       # Riwayat + Favorit + Detail modal
-│   │   ├── settings-view.tsx     # API key + tema + bahasa
+│   │   ├── settings-view.tsx     # Tema + bahasa + data
 │   │   ├── botanical-deco.tsx     # Dekorasi daun + scan grid
 │   │   └── theme-provider.tsx     # next-themes wrapper
 │   ├── lib/
@@ -443,7 +436,7 @@ my-project/
 │   │   ├── image.ts               # Sharp image processing
 │   │   ├── db.ts                  # Prisma client
 │   │   ├── i18n.ts                # Translations ID/EN
-│   │   ├── store.ts               # Zustand store (view, locale, apiKey)
+│   │   ├── store.ts               # Zustand store (view, locale)
 │   │   └── utils.ts               # cn() helper
 │   ├── hooks/
 │   │   ├── use-toast.ts
@@ -493,7 +486,7 @@ AI diberi peran sebagai **botanis ahli** dan diinstruksikan:
 
 ### Prasyarat
 - **Node.js 18+** atau **Bun** runtime
-- **Google Gemini API Key** — dapatkan gratis di [Google AI Studio](https://aistudio.google.com/app/apikey)
+- **Google Gemini API access** — siapkan `GEMINI_API_KEY` di `.env.local`
 
 ### Langkah Instalasi (Windows)
 
@@ -510,6 +503,7 @@ npm install
 # 3. Setup environment variables
 #    Buat file .env di root project:
 #    DATABASE_URL="file:./db/custom.db"
+#    GEMINI_API_KEY="AIza..."
 
 # 4. Inisialisasi database
 bun run db:push
@@ -520,6 +514,7 @@ npx prisma db push
 ### File `.env`
 ```env
 DATABASE_URL="file:./db/custom.db"
+GEMINI_API_KEY="AIza..."
 ```
 
 ---
@@ -535,15 +530,11 @@ bun run dev
 # Aplikasi tersedia di http://localhost:3000
 ```
 
-### Setup API Key Gemini
+### Setup Gemini
 
-1. Buka aplikasi di browser
-2. Klik **Pengaturan** (Settings) di navbar
-3. Tempel **Gemini API Key** Anda di kolom "Kunci API Gemini"
-4. Klik **Simpan Kunci API**
-5. Kini Anda bisa mulai memindai tumbuhan!
-
-> API key disimpan **lokal di browser** Anda (localStorage), tidak dikirim ke server kecuali saat melakukan scan.
+1. Tambahkan `GEMINI_API_KEY` ke file `.env.local` di root project
+2. Restart dev server agar environment terbaca
+3. Buka aplikasi dan langsung mulai memindai tumbuhan
 
 ### Perintah Lain
 
@@ -581,12 +572,11 @@ Aplikasi ini menggunakan Next.js **standalone output**, sehingga dapat di-deploy
 
 ```env
 DATABASE_URL="file:./db/custom.db"
-# Tambahkan konfigurasi produksi lain sesuai kebutuhan
+GEMINI_API_KEY="AIza..."
 ```
 
-> **Penting:** API Key Gemini **tidak** disimpan di environment server.
-> Setiap pengguna memasukkan API key-nya sendiri melalui UI Settings,
-> yang disimpan di localStorage browser masing-masing.
+> **Penting:** `GEMINI_API_KEY` harus tersedia di environment server.
+> Tanpa itu, endpoint scan akan gagal dengan `CONFIGURATION_ERROR`.
 
 ---
 
@@ -594,13 +584,13 @@ DATABASE_URL="file:./db/custom.db"
 
 | Aspek | Implementasi |
 |-------|-------------|
-| **API Key Storage** | Disimpan lokal di browser (localStorage), bukan di server |
+| **API Key Storage** | Disimpan di environment server sebagai `GEMINI_API_KEY` |
 | **Validasi File** | Cek MIME type & ukuran (maks 10 MB, JPG/PNG/WEBP) |
 | **Validasi Input** | Schema JSON response Gemini divalidasi & dinormalisasi |
 | **Image Processing** | Resize & re-encode via Sharp (cegah payload berlebih) |
-| **Error Handling** | API key tidak pernah di-log; error dinormalisasi |
+| **Error Handling** | Key tidak pernah dikirim dari client; error dinormalisasi |
 | **CORS** | Same-origin (API route Next.js) |
-| **Environment Variables** | `DATABASE_URL` via `.env`, tidak di-commit |
+| **Environment Variables** | `DATABASE_URL` dan `GEMINI_API_KEY` via `.env`, tidak di-commit |
 
 ---
 

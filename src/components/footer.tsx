@@ -78,16 +78,6 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <a
-                  href="https://aistudio.google.com/app/apikey"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors hover:text-primary"
-                >
-                  Gemini API Key
-                </a>
-              </li>
-              <li>
-                <a
                   href="https://ai.google.dev/gemini-api/docs"
                   target="_blank"
                   rel="noopener noreferrer"

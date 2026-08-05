@@ -9,8 +9,6 @@ import {
   Sparkles,
   X,
   RefreshCw,
-  KeyRound,
-  ArrowRight,
   Loader2,
   ScanLine,
 } from "lucide-react";
@@ -26,7 +24,7 @@ const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
 
 export function ScannerView() {
   const t = useT();
-  const { apiKey, locale, setView } = useAppStore();
+  const { locale } = useAppStore();
 
   const [image, setImage] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "analyzing">("idle");
@@ -37,8 +35,6 @@ export function ScannerView() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
-
-  const hasKey = apiKey.length > 10;
 
   // ---- Image handling ----
   const handleFile = useCallback(
@@ -76,10 +72,6 @@ export function ScannerView() {
 
   // ---- Analysis ----
   const analyze = useCallback(async () => {
-    if (!hasKey) {
-      toast.error(t.toast.apiKeyRequired);
-      return;
-    }
     if (!image) {
       toast.error(t.scanner.noImage);
       return;
@@ -90,7 +82,7 @@ export function ScannerView() {
       const res = await fetch("/api/scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image, apiKey, locale }),
+        body: JSON.stringify({ image, locale }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -113,7 +105,7 @@ export function ScannerView() {
       // small delay to let the animation breathe, then show result
       setTimeout(() => setStatus("idle"), 100);
     }
-  }, [hasKey, image, apiKey, locale, t]);
+  }, [image, locale, t]);
 
   // ---- Save / favorite / share ----
   const save = useCallback(async () => {
@@ -195,50 +187,6 @@ export function ScannerView() {
           <p className="mt-2 text-muted-foreground">{t.scanner.subtitle}</p>
         </div>
 
-        {/* API key gate */}
-        {!hasKey && (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-8 overflow-hidden rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:p-6"
-          >
-            <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                <KeyRound className="h-6 w-6" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold">{t.scanner.needApiKeyTitle}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {t.scanner.needApiKeyDesc}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  asChild
-                >
-                  <a
-                    href="https://aistudio.google.com/app/apikey"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {t.scanner.getApiKey}
-                  </a>
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => setView("settings")}
-                  className="gap-1.5"
-                >
-                  {t.scanner.goToSettings}
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
         {/* Main scanner card */}
         <div className="mt-8">
           <AnimatePresence mode="wait">
@@ -267,7 +215,6 @@ export function ScannerView() {
                   <PreviewCard
                     image={image}
                     t={t}
-                    hasKey={hasKey}
                     onAnalyze={analyze}
                     onRetake={rescan}
                     onOpenCamera={() => setCameraOpen(true)}
@@ -391,14 +338,12 @@ function UploadCard({
 function PreviewCard({
   image,
   t,
-  hasKey,
   onAnalyze,
   onRetake,
   onOpenCamera,
 }: {
   image: string;
   t: ReturnType<typeof useT>;
-  hasKey: boolean;
   onAnalyze: () => void;
   onRetake: () => void;
   onOpenCamera: () => void;
@@ -424,7 +369,6 @@ function PreviewCard({
         </Button>
         <Button
           onClick={onAnalyze}
-          disabled={!hasKey}
           className="ml-auto gap-2 rounded-full"
           size="lg"
         >

@@ -89,11 +89,6 @@ export const translations = {
       dropHere: "Lepaskan gambar di sini",
       formats: "Format: JPG, PNG, WEBP • Maks 10 MB",
       noImage: "Belum ada gambar. Unggah atau ambil foto terlebih dahulu.",
-      needApiKeyTitle: "Kunci API Gemini Diperlukan",
-      needApiKeyDesc:
-        "Untuk mulai memindai, masukkan kunci API Gemini kamu di pengaturan. Model: gemini-2.5-flash-lite.",
-      goToSettings: "Buka Pengaturan",
-      getApiKey: "Dapatkan Kunci API",
     },
 
     // Result
@@ -153,17 +148,7 @@ export const translations = {
     // Settings
     settings: {
       title: "Pengaturan",
-      subtitle: "Kelola preferensi aplikasi & kunci API",
-      apiKeyTitle: "Kunci API Gemini",
-      apiKeyDesc:
-        "Diperlukan untuk mengakses model Gemini 2.5 Flash Lite. Disimpan lokal di peramban kamu.",
-      apiKeyPlaceholder: "Tempel kunci API Gemini di sini…",
-      saveApiKey: "Simpan Kunci API",
-      apiKeySaved: "Kunci API tersimpan",
-      apiKeyClear: "Hapus Kunci",
-      getApiKey: "Dapatkan Kunci API Gratis",
-      haveKey: "Kunci API aktif",
-      noKey: "Belum ada kunci API",
+      subtitle: "Kelola preferensi aplikasi",
       appearance: "Tampilan",
       appearanceDesc: "Pilih tema gelap atau terang",
       light: "Terang",
@@ -199,8 +184,7 @@ export const translations = {
 
     // Toasts
     toast: {
-      apiKeyRequired: "Mohon masukkan kunci API Gemini terlebih dahulu",
-      scanError: "Gagal menganalisis gambar. Periksa kunci API & coba lagi.",
+      scanError: "Gagal menganalisis gambar. Coba lagi.",
       locationUnsupported:
         "API Gemini tidak tersedia di wilayah ini. Coba jaringan/wilayah lain.",
       saved: "Berhasil disimpan ke riwayat",
@@ -296,11 +280,6 @@ export const translations = {
       dropHere: "Drop the image here",
       formats: "Format: JPG, PNG, WEBP • Max 10 MB",
       noImage: "No image yet. Upload or capture a photo first.",
-      needApiKeyTitle: "Gemini API Key Required",
-      needApiKeyDesc:
-        "To start scanning, enter your Gemini API key in settings. Model: gemini-2.5-flash-lite.",
-      goToSettings: "Open Settings",
-      getApiKey: "Get API Key",
     },
 
     result: {
@@ -356,17 +335,7 @@ export const translations = {
 
     settings: {
       title: "Settings",
-      subtitle: "Manage app preferences & API key",
-      apiKeyTitle: "Gemini API Key",
-      apiKeyDesc:
-        "Required to access the Gemini 2.5 Flash Lite model. Stored locally in your browser.",
-      apiKeyPlaceholder: "Paste your Gemini API key here…",
-      saveApiKey: "Save API Key",
-      apiKeySaved: "API key saved",
-      apiKeyClear: "Clear Key",
-      getApiKey: "Get a Free API Key",
-      haveKey: "API key active",
-      noKey: "No API key yet",
+      subtitle: "Manage app preferences",
       appearance: "Appearance",
       appearanceDesc: "Choose dark or light theme",
       light: "Light",
@@ -400,8 +369,7 @@ export const translations = {
     },
 
     toast: {
-      apiKeyRequired: "Please enter your Gemini API key first",
-      scanError: "Failed to analyze image. Check your API key & try again.",
+      scanError: "Failed to analyze image. Try again.",
       locationUnsupported:
         "Gemini API is not available in this region. Try a different network/region.",
       saved: "Successfully saved to history",

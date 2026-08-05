@@ -23,8 +23,7 @@ import Image from "next/image";
 
 export function LandingHero() {
   const t = useT();
-  const { setView, apiKey } = useAppStore();
-  const hasKey = apiKey.length > 10;
+  const { setView } = useAppStore();
 
   return (
     <section className="relative overflow-hidden">
@@ -108,18 +107,6 @@ export function LandingHero() {
               <Stat value="98%" label={t.hero.stat2} />
               <Stat value="<3s" label={t.hero.stat3} />
             </motion.div>
-
-            {!hasKey && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.35 }}
-                className="mt-5 inline-flex items-center gap-2 rounded-lg border border-dashed border-primary/40 bg-primary/5 px-3 py-1.5 text-xs text-primary"
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                {t.scanner.needApiKeyDesc}
-              </motion.div>
-            )}
           </div>
 
           {/* Right: hero image */}

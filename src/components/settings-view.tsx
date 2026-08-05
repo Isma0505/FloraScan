@@ -3,12 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  KeyRound,
-  Eye,
-  EyeOff,
-  Save,
   Trash2,
-  Check,
   Sun,
   Moon,
   Monitor,
@@ -16,11 +11,9 @@ import {
   Database,
   Info,
   Sparkles,
-  ExternalLink,
   ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useAppStore, useT } from "@/lib/store";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
@@ -39,37 +32,13 @@ import type { Locale } from "@/lib/i18n";
 
 export function SettingsView() {
   const t = useT();
-  const { apiKey, setApiKey, clearApiKey, locale, setLocale } = useAppStore();
+  const { locale, setLocale } = useAppStore();
   const { theme, setTheme } = useTheme();
 
-  const [keyInput, setKeyInput] = useState("");
-  const [showKey, setShowKey] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [clearing, setClearing] = useState(false);
 
   useEffect(() => setMounted(true), []);
-
-  // sync local input with store on mount
-  useEffect(() => {
-    setKeyInput(apiKey);
-  }, [apiKey]);
-
-  const hasKey = apiKey.length > 10;
-
-  const handleSave = () => {
-    if (!keyInput.trim()) {
-      toast.error(t.toast.apiKeyRequired);
-      return;
-    }
-    setApiKey(keyInput.trim());
-    toast.success(t.settings.apiKeySaved);
-  };
-
-  const handleClear = () => {
-    clearApiKey();
-    setKeyInput("");
-    toast.success(t.settings.apiKeySaved);
-  };
 
   const handleClearAll = async () => {
     setClearing(true);
@@ -100,79 +69,6 @@ export function SettingsView() {
         </div>
 
         <div className="mt-8 space-y-5">
-          {/* API Key */}
-          <SettingsCard icon={KeyRound} title={t.settings.apiKeyTitle} desc={t.settings.apiKeyDesc}>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="relative flex-1">
-                  <Input
-                    type={showKey ? "text" : "password"}
-                    value={keyInput}
-                    onChange={(e) => setKeyInput(e.target.value)}
-                    placeholder={t.settings.apiKeyPlaceholder}
-                    className="pr-10 font-mono text-sm"
-                    autoComplete="off"
-                    spellCheck={false}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowKey((s) => !s)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    aria-label={showKey ? "Hide" : "Show"}
-                  >
-                    {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <Button onClick={handleSave} className="gap-2 rounded-full" size="sm">
-                  <Save className="h-3.5 w-3.5" />
-                  {t.settings.saveApiKey}
-                </Button>
-                {hasKey && (
-                  <Button
-                    onClick={handleClear}
-                    variant="outline"
-                    className="gap-2 rounded-full"
-                    size="sm"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    {t.settings.apiKeyClear}
-                  </Button>
-                )}
-                <a
-                  href="https://aistudio.google.com/app/apikey"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-auto inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
-                >
-                  {t.settings.getApiKey}
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </div>
-
-              {/* Status pill */}
-              <div
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
-                  hasKey
-                    ? "bg-primary/10 text-primary"
-                    : "bg-muted text-muted-foreground"
-                }`}
-              >
-                {hasKey ? (
-                  <>
-                    <Check className="h-3.5 w-3.5" /> {t.settings.haveKey}
-                  </>
-                ) : (
-                  <>
-                    <KeyRound className="h-3.5 w-3.5" /> {t.settings.noKey}
-                  </>
-                )}
-              </div>
-            </div>
-          </SettingsCard>
-
           {/* Appearance */}
           <SettingsCard icon={Sun} title={t.settings.appearance} desc={t.settings.appearanceDesc}>
             <div className="grid grid-cols-3 gap-2">
