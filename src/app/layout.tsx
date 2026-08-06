@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "FloraScan AI" }],
   icons: {
-    icon: "/logo.svg",
+    icon: "/FloraScanAI.png",
   },
   openGraph: {
     title: "FloraScan AI — Pemindai Tumbuhan Cerdas",
