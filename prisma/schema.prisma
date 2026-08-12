@@ -1,0 +1,48 @@
+// Prisma schema for AI Plant Scanner
+// Database: PostgreSQL (Neon Serverless)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// Stores every plant scan result. Acts as the history/favorite source.
+model ScanHistory {
+  id           String   @id @default(cuid())
+  /// Base64-encoded thumbnail (resized) for quick preview in lists
+  imageThumb   String
+  /// Original base64 image (kept small via resize on the client)
+  imageData    String
+  /// Common / display name of the detected plant
+  plantName    String
+  /// Scientific / latin name
+  latinName    String
+  /// Category e.g. Bunga, Pohon, Sukulen, Herba
+  category     String
+  /// Confidence score 0-100
+  confidence   Float
+  /// Natural habitat description
+  habitat      String
+  /// JSON string array of benefits / uses
+  benefits     String
+  /// JSON string array of care instructions
+  care         String
+  /// Danger / toxicity level: Rendah / Sedang / Tinggi
+  dangerLevel  String
+  /// Short description / summary
+  description  String
+  /// Whether the plant was detected successfully
+  detected     Boolean  @default(true)
+  /// Favorited by user
+  isFavorite   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isFavorite])
+  @@index([createdAt])
+}
