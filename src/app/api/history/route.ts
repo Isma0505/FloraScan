@@ -17,7 +17,14 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ items });
+    // Ubah JSON string menjadi array
+    const normalizedItems = items.map((item) => ({
+      ...item,
+      benefits: parseJsonArray(item.benefits),
+      care: parseJsonArray(item.care),
+    }));
+
+    return NextResponse.json({ items: normalizedItems });
   } catch (err) {
     console.error("[/api/history GET] error:", err);
 
@@ -84,5 +91,28 @@ export async function POST(req: NextRequest) {
       },
       { status: 500 }
     );
+  }
+}
+
+// Helper untuk mengubah JSON string menjadi string[]
+function parseJsonArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map(String);
+  }
+
+  if (typeof value !== "string") {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+
+    if (Array.isArray(parsed)) {
+      return parsed.map(String);
+    }
+
+    return [];
+  } catch {
+    return [];
   }
 }
