@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { useAppStore, useT } from "@/lib/store";
 import { useTheme } from "next-themes";
 import type { View } from "@/lib/store";
+import { AuthControl } from "@/components/auth-dialog";
 
 const navItems: { key: View; icon: typeof Home }[] = [
   { key: "home", icon: Home },
@@ -97,6 +98,7 @@ export function Navbar() {
 
         {/* Right controls */}
         <div className="flex items-center gap-1.5">
+          <AuthControl />
           {/* Language toggle */}
           <button
             onClick={() => setLocale(locale === "id" ? "en" : "id")}

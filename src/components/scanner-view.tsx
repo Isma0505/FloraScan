@@ -18,6 +18,10 @@ import { ScanResult } from "@/components/scan-result";
 import { ScanGrid } from "@/components/botanical-deco";
 import { toast } from "sonner";
 import type { PlantResult } from "@/types";
+import {
+  saveHistory,
+  updateHistoryFavorite,
+} from "@/lib/storage";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
@@ -29,6 +33,7 @@ export function ScannerView() {
   const [image, setImage] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "analyzing">("idle");
   const [result, setResult] = useState<PlantResult | null>(null);
+  const [resultLocale, setResultLocale] = useState<typeof locale | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -52,6 +57,7 @@ export function ScannerView() {
         const dataUrl = reader.result as string;
         downscaleImage(dataUrl, 1280).then(setImage);
         setResult(null);
+        setResultLocale(null);
         setSavedId(null);
         setIsFavorite(false);
       };
@@ -98,6 +104,7 @@ export function ScannerView() {
         return;
       }
       setResult(data.result as PlantResult);
+      setResultLocale(locale);
     } catch {
       toast.error(t.toast.scanError);
     } finally {
@@ -107,68 +114,94 @@ export function ScannerView() {
     }
   }, [image, locale, t]);
 
+  useEffect(() => {
+    if (!image || !result || !resultLocale || resultLocale === locale) return;
+
+    let cancelled = false;
+    setStatus("analyzing");
+    fetch("/api/scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image, locale }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "TRANSLATION_FAILED");
+        if (!cancelled) {
+          setResult(data.result as PlantResult);
+          setResultLocale(locale);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) toast.error(t.toast.scanError);
+      })
+      .finally(() => {
+        if (!cancelled) setStatus("idle");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [image, locale, result, resultLocale, t]);
+
   // ---- Save / favorite / share ----
-  const save = useCallback(async () => {
-    if (!result || !image || savedId) return;
-    try {
-      const res = await fetch("/api/history", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+  const save = useCallback(() => {
+      if (!result || !image || savedId) return;
+
+      try {
+        const id = crypto.randomUUID();
+
+        saveHistory({
+          id,
           image,
           result,
           isFavorite,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.message);
-      setSavedId(data.item.id);
-      toast.success(t.toast.saved);
-    } catch {
-      toast.error(t.toast.saveError);
-    }
-  }, [result, image, savedId, isFavorite, t]);
-
-  const toggleFavorite = useCallback(async () => {
-    const next = !isFavorite;
-    setIsFavorite(next);
-    if (savedId) {
-      try {
-        await fetch(`/api/history/${savedId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ isFavorite: next }),
+          createdAt: new Date().toISOString(),
         });
-        toast.success(next ? t.toast.favorited : t.toast.unfavorited);
-      } catch {
-        /* ignore */
-      }
-    } else {
-      toast.success(next ? t.toast.favorited : t.toast.unfavorited);
-    }
-  }, [isFavorite, savedId, t]);
 
-  const share = useCallback(async () => {
-    if (!result) return;
-    const text = `🌿 ${result.plantName} (${result.latinName})\nKategori: ${result.category}\nKeyakinan: ${result.confidence.toFixed(0)}%`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: result.plantName, text });
-      } else {
-        await navigator.clipboard.writeText(text);
-        toast.success(t.result.shared);
+        setSavedId(id);
+
+        toast.success(t.toast.saved);
+      } catch {
+        toast.error(t.toast.saveError);
       }
-    } catch {
-      /* user cancelled */
-    }
-  }, [result, t]);
+    }, [result, image, savedId, isFavorite, t]);
+
+  const toggleFavorite = useCallback(() => {
+  const next = !isFavorite;
+
+  setIsFavorite(next);
+
+  if (savedId) {
+    updateHistoryFavorite(savedId, next);
+  }
+
+  toast.success(
+    next
+      ? t.toast.favorited
+      : t.toast.unfavorited
+  );
+}, [isFavorite, savedId, t]);
 
   const rescan = useCallback(() => {
     setImage(null);
     setResult(null);
+    setResultLocale(null);
     setSavedId(null);
     setIsFavorite(false);
   }, []);
+
+  const share = useCallback(async () => {
+    if (!result) return;
+    const text = `${result.plantName} (${result.latinName}) - ${result.isToxic ? t.result.toxic : t.result.nonToxic}`;
+    try {
+      if (navigator.share) await navigator.share({ title: result.plantName, text });
+      else await navigator.clipboard.writeText(text);
+      toast.success(t.result.shared);
+    } catch {
+      // Sharing can be cancelled by the user.
+    }
+  }, [result, t]);
 
   // ---- Render ----
   return (

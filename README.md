@@ -502,18 +502,11 @@ npm install
 
 # 3. Setup environment variables
 #    Buat file .env di root project:
-#    DATABASE_URL="file:./db/custom.db"
 #    GEMINI_API_KEY="AIza..."
-
-# 4. Inisialisasi database
-bun run db:push
-# atau
-npx prisma db push
 ```
 
 ### File `.env`
 ```env
-DATABASE_URL="file:./db/custom.db"
 GEMINI_API_KEY="AIza..."
 ```
 
@@ -540,10 +533,12 @@ bun run dev
 
 ```powershell
 bun run lint        # Cek kualitas kode (ESLint)
-bun run db:push     # Push schema ke database
-bun run db:generate # Generate Prisma Client
-bun run db:reset    # Reset database (HATI-HATI!)
+bun run typecheck   # Cek tipe TypeScript
 ```
+
+Riwayat scan disimpan di `localStorage` browser, sehingga proyek ini tidak memerlukan Prisma atau perintah `db:push`.
+
+Register/login saat ini juga berjalan lokal di browser menggunakan `localStorage`, cocok untuk demo atau penggunaan pribadi. Untuk production multi-user, ganti modul `src/lib/auth.ts` dengan autentikasi server dan database; password lokal tidak boleh dipakai sebagai sistem keamanan production.
 
 ---
 

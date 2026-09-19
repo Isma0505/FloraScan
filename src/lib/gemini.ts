@@ -55,6 +55,11 @@ const plantSchema = {
       description:
         "Toxicity / danger level — must be exactly one of: 'Rendah' (Low), 'Sedang' (Medium), 'Tinggi' (High).",
     },
+    isToxic: {
+      type: Type.BOOLEAN,
+      description:
+        "Whether the plant is poisonous/toxic to humans or animals. Set true only when toxicity is known or strongly suspected.",
+    },
     description: {
       type: Type.STRING,
       description: "A short informative paragraph about the plant.",
@@ -70,6 +75,7 @@ const plantSchema = {
     "benefits",
     "care",
     "dangerLevel",
+    "isToxic",
     "description",
   ],
 };
@@ -84,6 +90,7 @@ Instructions:
 - "latinName" must be the real scientific binomial name (Genus species). If unsure, give the closest genus.
 - "category" should be a single short category word.
 - "dangerLevel" MUST be exactly one of: "Rendah", "Sedang", "Tinggi".
+- "isToxic" MUST be true when the plant is poisonous/toxic and false when it is non-toxic. Do not infer toxicity from danger level alone.
 - "confidence" is your estimated identification confidence 0-100.
 - "benefits" and "care" should each contain 3-6 concise, practical bullet points.
 - "description" should be 1-3 sentences.
@@ -161,6 +168,7 @@ export async function identifyPlant(
       ? parsed.care.map((c) => String(c).trim()).filter(Boolean)
       : [],
     dangerLevel: parsed.dangerLevel?.trim() || "Rendah",
+    isToxic: parsed.isToxic === true,
     description: parsed.description?.trim() || "",
   };
 

@@ -34,6 +34,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAppStore, useT } from "@/lib/store";
 import { toast } from "sonner";
+import {
+  deleteHistory,
+  getHistory,
+  updateHistoryFavorite,
+  type HistoryItem,
+} from "@/lib/storage";
 import type { ScanHistoryItem } from "@/types";
 
 export function HistoryView({ favoritesOnly = false }: { favoritesOnly?: boolean }) {
@@ -49,16 +55,14 @@ export function HistoryView({ favoritesOnly = false }: { favoritesOnly?: boolean
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (filterFav || favoritesOnly) params.set("favorites", "1");
-      if (query.trim()) params.set("q", query.trim());
-      const res = await fetch(`/api/history?${params.toString()}`);
-      const data = await res.json();
-      if (res.ok) {
-        setItems(data.items ?? []);
-      } else {
-        toast.error(t.toast.loadError);
-      }
+      const search = query.trim().toLowerCase();
+      const filtered = getHistory().map(toHistoryItem).filter((item) => {
+        const matchesFavorite = !filterFav && !favoritesOnly || item.isFavorite;
+        const matchesSearch = !search || [item.plantName, item.latinName, item.category]
+          .some((value) => value.toLowerCase().includes(search));
+        return matchesFavorite && matchesSearch;
+      });
+      setItems(filtered);
     } catch {
       toast.error(t.toast.loadError);
     } finally {
@@ -82,11 +86,7 @@ export function HistoryView({ favoritesOnly = false }: { favoritesOnly?: boolean
       );
       setSelected((s) => (s && s.id === item.id ? { ...s, isFavorite: next } : s));
       try {
-        await fetch(`/api/history/${item.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ isFavorite: next }),
-        });
+        updateHistoryFavorite(item.id, next);
         toast.success(next ? t.toast.favorited : t.toast.unfavorited);
         if ((favoritesOnly || filterFav) && !next) {
           // removed from favorites view — refetch to drop it
@@ -106,7 +106,7 @@ export function HistoryView({ favoritesOnly = false }: { favoritesOnly?: boolean
     setItems((prev) => prev.filter((it) => it.id !== id));
     if (selected?.id === id) setSelected(null);
     try {
-      await fetch(`/api/history/${id}`, { method: "DELETE" });
+      deleteHistory(id);
       toast.success(t.history.deleted);
     } catch {
       toast.error(t.toast.deleteError);
@@ -322,6 +322,17 @@ function HistoryCard({
       </div>
     </motion.div>
   );
+}
+
+function toHistoryItem(item: HistoryItem): ScanHistoryItem {
+  return {
+    ...item.result,
+    id: item.id,
+    imageThumb: item.image,
+    imageData: item.image,
+    isFavorite: item.isFavorite,
+    createdAt: item.createdAt,
+  };
 }
 
 function DetailModal({

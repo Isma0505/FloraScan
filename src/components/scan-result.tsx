@@ -14,7 +14,10 @@ import {
   RotateCcw,
   Check,
   FlaskConical,
+  FileText,
+  FileDown,
 } from "lucide-react";
+import { jsPDF } from "jspdf";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useT } from "@/lib/store";
@@ -119,6 +122,14 @@ export function ScanResult({
               <ShieldAlert className="h-3.5 w-3.5" />
               {t.result.dangerLevel}: {dangerColor.label}
             </Badge>
+            <Badge
+              variant="secondary"
+              className="gap-1.5 rounded-full"
+              style={getToxicityColor(result.isToxic)}
+            >
+              <ShieldAlert className="h-3.5 w-3.5" />
+              {t.result.toxicity}: {result.isToxic ? t.result.toxic : t.result.nonToxic}
+            </Badge>
           </div>
 
           {/* Confidence bar */}
@@ -218,6 +229,12 @@ export function ScanResult({
           <Share2 className="h-4 w-4" />
           {t.result.share}
         </Button>
+        <Button onClick={() => downloadWord(imageData, result, t)} variant="outline" className="gap-2 rounded-full">
+          <FileText className="h-4 w-4" /> {t.result.downloadWord}
+        </Button>
+        <Button onClick={() => downloadPdf(imageData, result, t)} variant="outline" className="gap-2 rounded-full">
+          <FileDown className="h-4 w-4" /> {t.result.downloadPdf}
+        </Button>
         <Button
           onClick={onRescan}
           variant="ghost"
@@ -277,6 +294,67 @@ function getDangerColor(
     bg: "oklch(0.62 0.16 152 / 0.12)",
     label: t.result.low,
   };
+}
+
+function getToxicityColor(isToxic: boolean) {
+  return isToxic
+    ? { color: "oklch(0.55 0.2 25)", backgroundColor: "oklch(0.55 0.2 25 / 0.12)" }
+    : { color: "oklch(0.62 0.16 152)", backgroundColor: "oklch(0.62 0.16 152 / 0.12)" };
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadWord(imageData: string, result: PlantResult, t: ReturnType<typeof useT>) {
+  const html = `<html><body><h1>${escapeHtml(result.plantName)}</h1><img src="${imageData}" style="max-width:500px"><p><i>${escapeHtml(result.latinName)}</i></p><p><b>${t.result.toxicity}:</b> ${result.isToxic ? t.result.toxic : t.result.nonToxic}</p><p><b>${t.result.category}:</b> ${escapeHtml(result.category)}</p><p><b>${t.result.description}:</b> ${escapeHtml(result.description)}</p><p><b>${t.result.habitat}:</b> ${escapeHtml(result.habitat)}</p><h2>${t.result.benefits}</h2><ul>${result.benefits.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul><h2>${t.result.care}</h2><ul>${result.care.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></body></html>`;
+  downloadBlob(new Blob([html], { type: "application/msword" }), `${slugify(result.plantName)}.doc`);
+}
+
+function downloadPdf(imageData: string, result: PlantResult, t: ReturnType<typeof useT>) {
+  const pdf = new jsPDF();
+  pdf.setFontSize(20);
+  pdf.text(result.plantName, 15, 20);
+  pdf.setFontSize(11);
+  pdf.text(result.latinName, 15, 28);
+  pdf.text(`${t.result.toxicity}: ${result.isToxic ? t.result.toxic : t.result.nonToxic}`, 15, 38);
+  pdf.text(`${t.result.category}: ${result.category}`, 15, 46);
+  pdf.text(`${t.result.habitat}: ${result.habitat}`, 15, 54, { maxWidth: 180 });
+  pdf.text(`${t.result.description}:`, 15, 70);
+  pdf.text(pdf.splitTextToSize(result.description, 180), 15, 78);
+  pdf.addImage(imageData, "JPEG", 15, 100, 80, 80);
+  let y = 195;
+  pdf.setFontSize(12);
+  pdf.text(`${t.result.benefits}:`, 15, y);
+  y += 7;
+  pdf.setFontSize(10);
+  for (const item of result.benefits) {
+    pdf.text(pdf.splitTextToSize(`- ${item}`, 180), 18, y);
+    y += 6;
+  }
+  y += 4;
+  pdf.setFontSize(12);
+  pdf.text(`${t.result.care}:`, 15, y);
+  y += 7;
+  pdf.setFontSize(10);
+  for (const item of result.care) {
+    pdf.text(pdf.splitTextToSize(`- ${item}`, 180), 18, y);
+    y += 6;
+  }
+  pdf.save(`${slugify(result.plantName)}.pdf`);
+}
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char] || char);
+}
+
+function slugify(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "florascan-result";
 }
 
 export type { ScanHistoryItem };
