@@ -81,7 +81,11 @@ FloraScan AI adalah aplikasi web pemindai tumbuhan berbasis AI yang dapat mengen
        │                               │
        ▼                               ▼
 ┌──────────────┐              ┌────────────────┐
+<<<<<<< HEAD
 │  Gemini AI    │              │   SQLite DB     │
+=======
+│  Gemini AI    │              │   PostgreSQL DB     │
+>>>>>>> origin/main
 │  2.5 Flash     │              │  (Prisma ORM)   │
 │  Lite Vision   │              │  ScanHistory    │
 └──────────────┘              └────────────────┘
@@ -129,7 +133,11 @@ Tampilkan Hasil Lengkap
 - **Bun Runtime**
 
 ### Database
+<<<<<<< HEAD
 - **SQLite** (via Prisma ORM)
+=======
+- **PostgreSQL** (via Prisma ORM)
+>>>>>>> origin/main
 
 ### AI
 - **Google Gemini API** — model `gemini-2.5-flash-lite` (Vision)
@@ -502,11 +510,25 @@ npm install
 
 # 3. Setup environment variables
 #    Buat file .env di root project:
+<<<<<<< HEAD
 #    GEMINI_API_KEY="AIza..."
+=======
+#    DATABASE_URL="file:./db/custom.db"
+#    GEMINI_API_KEY="AIza..."
+
+# 4. Inisialisasi database
+bun run db:push
+# atau
+npx prisma db push
+>>>>>>> origin/main
 ```
 
 ### File `.env`
 ```env
+<<<<<<< HEAD
+=======
+DATABASE_URL="file:./db/custom.db"
+>>>>>>> origin/main
 GEMINI_API_KEY="AIza..."
 ```
 
@@ -533,6 +555,7 @@ bun run dev
 
 ```powershell
 bun run lint        # Cek kualitas kode (ESLint)
+<<<<<<< HEAD
 bun run typecheck   # Cek tipe TypeScript
 ```
 
@@ -540,6 +563,13 @@ Riwayat scan disimpan di `localStorage` browser, sehingga proyek ini tidak memer
 
 Register/login saat ini juga berjalan lokal di browser menggunakan `localStorage`, cocok untuk demo atau penggunaan pribadi. Untuk production multi-user, ganti modul `src/lib/auth.ts` dengan autentikasi server dan database; password lokal tidak boleh dipakai sebagai sistem keamanan production.
 
+=======
+bun run db:push     # Push schema ke database
+bun run db:generate # Generate Prisma Client
+bun run db:reset    # Reset database (HATI-HATI!)
+```
+
+>>>>>>> origin/main
 ---
 
 ## Cara Deployment

@@ -37,7 +37,11 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
+<<<<<<< HEAD
     "node_modules",
     "examples/websocket"
+=======
+    "node_modules"
+>>>>>>> origin/main
   ]
 }

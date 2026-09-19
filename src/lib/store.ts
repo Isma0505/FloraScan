@@ -32,7 +32,11 @@ export const useAppStore = create<AppState>()(
 
       locale: "id",
       setLocale: (l) => set({ locale: l }),
+<<<<<<< HEAD
       t: translations.id as Dict,
+=======
+      t: translations.id,
+>>>>>>> origin/main
     }),
     {
       name: "florascan-store",
@@ -41,7 +45,11 @@ export const useAppStore = create<AppState>()(
       partialize: (state) => ({ locale: state.locale }),
       onRehydrateStorage: () => (state) => {
         if (state) {
+<<<<<<< HEAD
           state.t = (translations[state.locale] ?? translations.id) as Dict;
+=======
+          state.t = translations[state.locale] ?? translations.id;
+>>>>>>> origin/main
         }
       },
       merge: (persisted, current) => {
@@ -51,7 +59,11 @@ export const useAppStore = create<AppState>()(
           ...current,
           ...p,
           locale,
+<<<<<<< HEAD
           t: (translations[locale] ?? translations.id) as Dict,
+=======
+          t: translations[locale] ?? translations.id,
+>>>>>>> origin/main
         };
       },
     }

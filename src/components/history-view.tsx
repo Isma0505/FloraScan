@@ -34,12 +34,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAppStore, useT } from "@/lib/store";
 import { toast } from "sonner";
+<<<<<<< HEAD
 import {
   deleteHistory,
   getHistory,
   updateHistoryFavorite,
   type HistoryItem,
 } from "@/lib/storage";
+=======
+>>>>>>> origin/main
 import type { ScanHistoryItem } from "@/types";
 
 export function HistoryView({ favoritesOnly = false }: { favoritesOnly?: boolean }) {
@@ -55,6 +58,7 @@ export function HistoryView({ favoritesOnly = false }: { favoritesOnly?: boolean
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
+<<<<<<< HEAD
       const search = query.trim().toLowerCase();
       const filtered = getHistory().map(toHistoryItem).filter((item) => {
         const matchesFavorite = !filterFav && !favoritesOnly || item.isFavorite;
@@ -63,6 +67,18 @@ export function HistoryView({ favoritesOnly = false }: { favoritesOnly?: boolean
         return matchesFavorite && matchesSearch;
       });
       setItems(filtered);
+=======
+      const params = new URLSearchParams();
+      if (filterFav || favoritesOnly) params.set("favorites", "1");
+      if (query.trim()) params.set("q", query.trim());
+      const res = await fetch(`/api/history?${params.toString()}`);
+      const data = await res.json();
+      if (res.ok) {
+        setItems(data.items ?? []);
+      } else {
+        toast.error(t.toast.loadError);
+      }
+>>>>>>> origin/main
     } catch {
       toast.error(t.toast.loadError);
     } finally {
@@ -86,7 +102,15 @@ export function HistoryView({ favoritesOnly = false }: { favoritesOnly?: boolean
       );
       setSelected((s) => (s && s.id === item.id ? { ...s, isFavorite: next } : s));
       try {
+<<<<<<< HEAD
         updateHistoryFavorite(item.id, next);
+=======
+        await fetch(`/api/history/${item.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isFavorite: next }),
+        });
+>>>>>>> origin/main
         toast.success(next ? t.toast.favorited : t.toast.unfavorited);
         if ((favoritesOnly || filterFav) && !next) {
           // removed from favorites view — refetch to drop it
@@ -106,7 +130,11 @@ export function HistoryView({ favoritesOnly = false }: { favoritesOnly?: boolean
     setItems((prev) => prev.filter((it) => it.id !== id));
     if (selected?.id === id) setSelected(null);
     try {
+<<<<<<< HEAD
       deleteHistory(id);
+=======
+      await fetch(`/api/history/${id}`, { method: "DELETE" });
+>>>>>>> origin/main
       toast.success(t.history.deleted);
     } catch {
       toast.error(t.toast.deleteError);
@@ -324,6 +352,7 @@ function HistoryCard({
   );
 }
 
+<<<<<<< HEAD
 function toHistoryItem(item: HistoryItem): ScanHistoryItem {
   return {
     ...item.result,
@@ -335,6 +364,8 @@ function toHistoryItem(item: HistoryItem): ScanHistoryItem {
   };
 }
 
+=======
+>>>>>>> origin/main
 function DetailModal({
   item,
   t,

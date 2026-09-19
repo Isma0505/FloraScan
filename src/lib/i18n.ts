@@ -102,6 +102,7 @@ export const translations = {
       benefits: "Manfaat",
       care: "Cara Perawatan",
       dangerLevel: "Tingkat Bahaya",
+<<<<<<< HEAD
       toxicity: "Status Racun",
       toxic: "Beracun",
       nonToxic: "Tidak Beracun",
@@ -132,6 +133,9 @@ export const translations = {
       invalidPassword: "Kata sandi saat ini salah",
       uploadPhoto: "Ganti Foto",
       accountLocalNote: "Akun ini tersimpan di browser perangkat ini.",
+=======
+      description: "Deskripsi",
+>>>>>>> origin/main
       saveHistory: "Simpan ke Riwayat",
       saved: "Tersimpan di Riwayat",
       favorite: "Tambah Favorit",
@@ -321,6 +325,7 @@ export const translations = {
       benefits: "Benefits",
       care: "Care Instructions",
       dangerLevel: "Toxicity Level",
+<<<<<<< HEAD
       toxicity: "Toxicity Status",
       toxic: "Toxic",
       nonToxic: "Non-toxic",
@@ -351,6 +356,9 @@ export const translations = {
       invalidPassword: "Current password is incorrect",
       uploadPhoto: "Change Photo",
       accountLocalNote: "This account is stored in this browser.",
+=======
+      description: "Description",
+>>>>>>> origin/main
       saveHistory: "Save to History",
       saved: "Saved to History",
       favorite: "Add to Favorites",
