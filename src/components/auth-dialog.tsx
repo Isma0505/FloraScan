@@ -155,7 +155,8 @@ function AccountModal({ user, onClose, onUpdated }: { user: LocalUser; onClose: 
       onUpdated(updateUserProfile(user.id, { name, email, avatar }));
       toast.success(t.result.profileUpdated);
     } catch (error) {
-      toast.error(error instanceof Error && error.message === "EMAIL_EXISTS" ? t.result.emailExists : t.result.authError);
+      const message = error instanceof Error ? error.message : "";
+      toast.error(message === "EMAIL_EXISTS" ? t.result.emailExists : t.result.profileError);
     }
   };
 

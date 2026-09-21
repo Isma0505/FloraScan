@@ -61,10 +61,12 @@ export function updateUserProfile(userId: string, changes: Pick<LocalUser, "name
     throw new Error("EMAIL_EXISTS");
   }
 
-  const current = users.find((user) => user.id === userId);
-  if (!current) throw new Error("USER_NOT_FOUND");
+  const current = users.find((user) => user.id === userId) ?? getCurrentUser();
+  if (!current || current.id !== userId) throw new Error("USER_NOT_FOUND");
   const updated = { ...current, ...changes, name: changes.name.trim(), email: normalizedEmail };
-  const nextUsers = users.map((user) => (user.id === userId ? updated : user));
+  const nextUsers = users.some((user) => user.id === userId)
+    ? users.map((user) => (user.id === userId ? updated : user))
+    : [...users, updated];
   localStorage.setItem(USERS_KEY, JSON.stringify(nextUsers));
   localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
   return updated;
