@@ -29,10 +29,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import type { Locale } from "@/lib/i18n";
-<<<<<<< HEAD
 import { clearHistory } from "@/lib/storage";
-=======
->>>>>>> origin/main
 
 export function SettingsView() {
   const t = useT();
@@ -47,11 +44,7 @@ export function SettingsView() {
   const handleClearAll = async () => {
     setClearing(true);
     try {
-<<<<<<< HEAD
       clearHistory();
-=======
-      await fetch("/api/history-all", { method: "DELETE" });
->>>>>>> origin/main
       toast.success(t.history.deleted);
     } catch {
       toast.error(t.toast.deleteError);
@@ -140,11 +133,7 @@ export function SettingsView() {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-<<<<<<< HEAD
                   <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-=======
-                  <AlertDialogCancel>{t.settings.cancel ?? t.common.cancel}</AlertDialogCancel>
->>>>>>> origin/main
                   <AlertDialogAction
                     onClick={handleClearAll}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

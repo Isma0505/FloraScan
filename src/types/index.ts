@@ -10,10 +10,7 @@ export interface PlantResult {
   benefits: string[];
   care: string[];
   dangerLevel: "Rendah" | "Sedang" | "Tinggi" | string;
-<<<<<<< HEAD
   isToxic: boolean;
-=======
->>>>>>> origin/main
   description: string;
 }
 

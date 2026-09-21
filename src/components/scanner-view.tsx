@@ -18,13 +18,6 @@ import { ScanResult } from "@/components/scan-result";
 import { ScanGrid } from "@/components/botanical-deco";
 import { toast } from "sonner";
 import type { PlantResult } from "@/types";
-<<<<<<< HEAD
-import {
-  saveHistory,
-  updateHistoryFavorite,
-} from "@/lib/storage";
-=======
->>>>>>> origin/main
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
@@ -36,10 +29,7 @@ export function ScannerView() {
   const [image, setImage] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "analyzing">("idle");
   const [result, setResult] = useState<PlantResult | null>(null);
-<<<<<<< HEAD
   const [resultLocale, setResultLocale] = useState<typeof locale | null>(null);
-=======
->>>>>>> origin/main
   const [savedId, setSavedId] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -63,10 +53,7 @@ export function ScannerView() {
         const dataUrl = reader.result as string;
         downscaleImage(dataUrl, 1280).then(setImage);
         setResult(null);
-<<<<<<< HEAD
         setResultLocale(null);
-=======
->>>>>>> origin/main
         setSavedId(null);
         setIsFavorite(false);
       };
@@ -113,10 +100,7 @@ export function ScannerView() {
         return;
       }
       setResult(data.result as PlantResult);
-<<<<<<< HEAD
       setResultLocale(locale);
-=======
->>>>>>> origin/main
     } catch {
       toast.error(t.toast.scanError);
     } finally {
@@ -126,7 +110,6 @@ export function ScannerView() {
     }
   }, [image, locale, t]);
 
-<<<<<<< HEAD
   useEffect(() => {
     if (!image || !result || !resultLocale || resultLocale === locale) return;
 
@@ -158,44 +141,6 @@ export function ScannerView() {
   }, [image, locale, result, resultLocale, t]);
 
   // ---- Save / favorite / share ----
-  const save = useCallback(() => {
-      if (!result || !image || savedId) return;
-
-      try {
-        const id = crypto.randomUUID();
-
-        saveHistory({
-          id,
-          image,
-          result,
-          isFavorite,
-          createdAt: new Date().toISOString(),
-        });
-
-        setSavedId(id);
-
-        toast.success(t.toast.saved);
-      } catch {
-        toast.error(t.toast.saveError);
-      }
-    }, [result, image, savedId, isFavorite, t]);
-
-  const toggleFavorite = useCallback(() => {
-  const next = !isFavorite;
-
-  setIsFavorite(next);
-
-  if (savedId) {
-    updateHistoryFavorite(savedId, next);
-  }
-
-  toast.success(
-    next
-      ? t.toast.favorited
-      : t.toast.unfavorited
-  );
-}, [isFavorite, savedId, t]);
-=======
   // ---- Save / favorite / share ----
   const save = useCallback(async () => {
     if (!result || !image || savedId) return;
@@ -237,34 +182,14 @@ export function ScannerView() {
     }
   }, [isFavorite, savedId, t]);
 
-  const share = useCallback(async () => {
-    if (!result) return;
-    const text = `🌿 ${result.plantName} (${result.latinName})\nKategori: ${result.category}\nKeyakinan: ${result.confidence.toFixed(0)}%`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: result.plantName, text });
-      } else {
-        await navigator.clipboard.writeText(text);
-        toast.success(t.result.shared);
-      }
-    } catch {
-      /* user cancelled */
-    }
-  }, [result, t]);
->>>>>>> origin/main
-
   const rescan = useCallback(() => {
     setImage(null);
     setResult(null);
-<<<<<<< HEAD
     setResultLocale(null);
-=======
->>>>>>> origin/main
     setSavedId(null);
     setIsFavorite(false);
   }, []);
 
-<<<<<<< HEAD
   const share = useCallback(async () => {
     if (!result) return;
     const text = `${result.plantName} (${result.latinName}) - ${result.isToxic ? t.result.toxic : t.result.nonToxic}`;
@@ -276,9 +201,6 @@ export function ScannerView() {
       // Sharing can be cancelled by the user.
     }
   }, [result, t]);
-
-=======
->>>>>>> origin/main
   // ---- Render ----
   return (
     <section className="relative">

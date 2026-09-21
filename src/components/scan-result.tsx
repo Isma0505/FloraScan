@@ -14,14 +14,10 @@ import {
   RotateCcw,
   Check,
   FlaskConical,
-<<<<<<< HEAD
   FileText,
   FileDown,
 } from "lucide-react";
 import { jsPDF } from "jspdf";
-=======
-} from "lucide-react";
->>>>>>> origin/main
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useT } from "@/lib/store";
@@ -126,7 +122,6 @@ export function ScanResult({
               <ShieldAlert className="h-3.5 w-3.5" />
               {t.result.dangerLevel}: {dangerColor.label}
             </Badge>
-<<<<<<< HEAD
             <Badge
               variant="secondary"
               className="gap-1.5 rounded-full"
@@ -135,8 +130,6 @@ export function ScanResult({
               <ShieldAlert className="h-3.5 w-3.5" />
               {t.result.toxicity}: {result.isToxic ? t.result.toxic : t.result.nonToxic}
             </Badge>
-=======
->>>>>>> origin/main
           </div>
 
           {/* Confidence bar */}
@@ -236,15 +229,12 @@ export function ScanResult({
           <Share2 className="h-4 w-4" />
           {t.result.share}
         </Button>
-<<<<<<< HEAD
         <Button onClick={() => downloadWord(imageData, result, t)} variant="outline" className="gap-2 rounded-full">
           <FileText className="h-4 w-4" /> {t.result.downloadWord}
         </Button>
         <Button onClick={() => downloadPdf(imageData, result, t)} variant="outline" className="gap-2 rounded-full">
           <FileDown className="h-4 w-4" /> {t.result.downloadPdf}
         </Button>
-=======
->>>>>>> origin/main
         <Button
           onClick={onRescan}
           variant="ghost"
@@ -306,7 +296,6 @@ function getDangerColor(
   };
 }
 
-<<<<<<< HEAD
 function getToxicityColor(isToxic: boolean) {
   return isToxic
     ? { color: "oklch(0.55 0.2 25)", backgroundColor: "oklch(0.55 0.2 25 / 0.12)" }
@@ -367,7 +356,4 @@ function escapeHtml(value: string) {
 function slugify(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "florascan-result";
 }
-
-=======
->>>>>>> origin/main
 export type { ScanHistoryItem };
