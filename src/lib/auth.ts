@@ -11,6 +11,22 @@ export interface LocalUser {
 const USERS_KEY = "florascan-users";
 const SESSION_KEY = "florascan-session";
 
+export function getPasswordStrength(password: string): "weak" | "fair" | "strong" {
+  let score = 0;
+  if (password.length >= 6) score += 1;
+  if (password.length >= 10) score += 1;
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1;
+  if (/\d/.test(password)) score += 1;
+  if (/[^A-Za-z0-9]/.test(password)) score += 1;
+  return score >= 4 ? "strong" : score >= 2 ? "fair" : "weak";
+}
+
+export function validatePassword(password: string): void {
+  if (password.length < 6 || getPasswordStrength(password) === "weak") {
+    throw new Error("WEAK_PASSWORD");
+  }
+}
+
 function readUsers(): LocalUser[] {
   try {
     return JSON.parse(localStorage.getItem(USERS_KEY) || "[]") as LocalUser[];
@@ -29,6 +45,7 @@ export function getCurrentUser(): LocalUser | null {
 }
 
 export function registerUser(name: string, email: string, password: string): LocalUser {
+  validatePassword(password);
   const users = readUsers();
   const normalizedEmail = email.trim().toLowerCase();
   if (users.some((user) => user.email === normalizedEmail)) {
@@ -73,6 +90,7 @@ export function updateUserProfile(userId: string, changes: Pick<LocalUser, "name
 }
 
 export function updateUserPassword(userId: string, currentPassword: string, nextPassword: string) {
+  validatePassword(nextPassword);
   const users = readUsers();
   const user = users.find((item) => item.id === userId);
   if (!user || user.password !== currentPassword) throw new Error("INVALID_PASSWORD");

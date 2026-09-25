@@ -2,11 +2,11 @@
 
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
-import { Check, KeyRound, Leaf, LogIn, LogOut, Mail, User, UserPlus, X } from "lucide-react";
+import { Check, Chrome, Eye, EyeOff, Facebook, Instagram, KeyRound, Leaf, LogIn, LogOut, Mail, MessageCircle, User, UserPlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/store";
-import { getCurrentUser, loginUser, logoutUser, registerUser, updateUserPassword, updateUserProfile, type LocalUser } from "@/lib/auth";
+import { getCurrentUser, getPasswordStrength, loginUser, logoutUser, registerUser, updateUserPassword, updateUserProfile, type LocalUser } from "@/lib/auth";
 import { toast } from "sonner";
 
 export function AuthControl() {
@@ -78,17 +78,22 @@ function AuthModal({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     try {
+      if (mode === "register" && password !== confirmPassword) throw new Error("PASSWORD_MISMATCH");
       const user = mode === "register"
         ? registerUser(name, email, password)
         : loginUser(email, password);
       toast.success(mode === "register" ? t.result.registerSuccess : t.result.loginSuccess);
       onAuthenticated(user);
     } catch (error) {
-      toast.error(error instanceof Error && error.message === "EMAIL_EXISTS" ? t.result.emailExists : t.result.authError);
+      const errorCode = error instanceof Error ? error.message : "";
+      toast.error(errorCode === "EMAIL_EXISTS" ? t.result.emailExists : errorCode === "PASSWORD_MISMATCH" ? t.result.passwordMismatch : errorCode === "WEAK_PASSWORD" ? t.result.weakPassword : t.result.authError);
     }
   };
 
@@ -114,12 +119,17 @@ function AuthModal({
         <form onSubmit={submit} className="mt-6 space-y-4">
           {mode === "register" && <AuthField icon={User} value={name} onChange={setName} placeholder={t.result.name} />}
           <AuthField icon={Mail} type="email" value={email} onChange={setEmail} placeholder={t.result.email} />
-          <AuthField icon={KeyRound} type="password" value={password} onChange={setPassword} placeholder={t.result.password} />
+          <PasswordField value={password} onChange={setPassword} placeholder={t.result.password} visible={showPassword} onToggle={() => setShowPassword(!showPassword)} />
+          {mode === "register" && <>
+            <PasswordHint password={password} />
+            <PasswordField value={confirmPassword} onChange={setConfirmPassword} placeholder={t.result.confirmPassword} visible={showConfirmPassword} onToggle={() => setShowConfirmPassword(!showConfirmPassword)} />
+          </>}
           <Button type="submit" className="h-12 w-full gap-2 rounded-xl text-base shadow-lg shadow-primary/20 transition hover:-translate-y-0.5">
             {mode === "login" ? <LogIn className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
             {mode === "login" ? t.result.login : t.result.register}
           </Button>
         </form>
+        <SocialLoginButtons />
         <button
           type="button"
           onClick={() => setMode(mode === "login" ? "register" : "login")}
@@ -131,6 +141,22 @@ function AuthModal({
       </div>
     </div>
   );
+}
+
+function PasswordField({ value, onChange, placeholder, visible, onToggle }: { value: string; onChange: (value: string) => void; placeholder: string; visible: boolean; onToggle: () => void }) {
+  return <div className="relative"><KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" /><Input className="h-12 rounded-xl bg-background/50 pl-10 pr-11" type={visible ? "text" : "password"} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} minLength={6} required /><button type="button" onClick={onToggle} aria-label={visible ? "Sembunyikan kata sandi" : "Perlihatkan kata sandi"} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"><span className="sr-only">{visible ? "Sembunyikan kata sandi" : "Perlihatkan kata sandi"}</span>{visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div>;
+}
+
+function PasswordHint({ password }: { password: string }) {
+  const strength = getPasswordStrength(password);
+  const label = !password ? "Minimal 6 karakter" : strength === "weak" ? "Kata sandi terlalu lemah" : strength === "fair" ? "Kata sandi cukup kuat" : "Kata sandi kuat";
+  const color = strength === "strong" ? "text-emerald-600" : strength === "fair" ? "text-amber-600" : "text-destructive";
+  return <p className={`-mt-2 text-xs ${color}`}>{label}. Gunakan huruf besar, angka, dan simbol.</p>;
+}
+
+function SocialLoginButtons() {
+  const providers = [[Chrome, "Google", "Google login memerlukan konfigurasi OAuth di Vercel."], [Facebook, "Facebook", "Facebook login memerlukan konfigurasi OAuth di Vercel."], [MessageCircle, "WhatsApp", "WhatsApp login memerlukan WhatsApp Business API dan OTP."], [Instagram, "Instagram", "Instagram tidak menyediakan login OAuth umum untuk aplikasi ini."]] as const;
+  return <div className="mt-5 border-t border-border/70 pt-5"><p className="mb-3 text-center text-xs text-muted-foreground">Login sosial akan tersedia setelah provider dikonfigurasi</p><div className="grid grid-cols-2 gap-2">{providers.map(([Icon, label, hint]) => <button key={label} type="button" disabled title={hint} className="flex h-10 items-center justify-center gap-2 rounded-lg border border-border bg-background/50 text-xs text-muted-foreground opacity-70"><Icon className="h-4 w-4" />{label}</button>)}</div></div>;
 }
 
 function AuthField({ icon: Icon, type = "text", value, onChange, placeholder }: { icon: typeof User; type?: string; value: string; onChange: (value: string) => void; placeholder: string }) {
@@ -191,7 +217,7 @@ function AccountModal({ user, onClose, onUpdated }: { user: LocalUser; onClose: 
       <div className="relative overflow-hidden bg-primary/10 px-6 py-7 sm:px-9"><div className="absolute -right-12 -top-20 h-48 w-48 rounded-full border-[28px] border-primary/10" /><div className="relative z-10 flex items-center justify-between"><div className="flex items-center gap-4"><Avatar user={{ ...user, avatar }} /><div><p className="text-sm text-muted-foreground">{t.result.account}</p><h2 className="text-2xl font-bold">{name}</h2><p className="text-sm text-muted-foreground">{email}</p></div></div><Button variant="ghost" size="icon" onClick={onClose} aria-label={t.common.close}><X className="h-4 w-4" /></Button></div></div>
       <div className="grid gap-6 p-6 sm:p-9 md:grid-cols-2">
         <form onSubmit={saveProfile} className="space-y-4"><div className="flex items-center gap-2 text-sm font-semibold"><User className="h-4 w-4 text-primary" />{t.result.editProfile}</div><label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 p-3"><Avatar user={{ ...user, avatar }} size="sm" /><span className="text-sm text-primary">{t.result.uploadPhoto}</span><input type="file" accept="image/*" className="hidden" onChange={choosePhoto} /></label><Input className="h-11 rounded-xl" value={name} onChange={(event) => setName(event.target.value)} placeholder={t.result.name} required /><Input className="h-11 rounded-xl" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder={t.result.email} required /><Button className="w-full rounded-xl" type="submit">{t.result.saveChanges}</Button></form>
-        <form onSubmit={savePassword} className="space-y-4"><div className="flex items-center gap-2 text-sm font-semibold"><KeyRound className="h-4 w-4 text-primary" />{t.result.changePassword}</div><Input className="h-11 rounded-xl" type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} placeholder={t.result.currentPassword} required /><Input className="h-11 rounded-xl" type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} placeholder={t.result.newPassword} minLength={6} required /><Button className="w-full rounded-xl" type="submit" variant="outline">{t.result.changePassword}</Button><Button type="button" variant="ghost" onClick={logout} className="w-full gap-2 rounded-xl text-destructive hover:text-destructive"><LogOut className="h-4 w-4" />{t.result.logout}</Button></form>
+        <form onSubmit={savePassword} className="space-y-4"><div className="flex items-center gap-2 text-sm font-semibold"><KeyRound className="h-4 w-4 text-primary" />{t.result.changePassword}</div><PasswordField value={currentPassword} onChange={setCurrentPassword} placeholder={t.result.currentPassword} visible={false} onToggle={() => undefined} /><PasswordField value={newPassword} onChange={setNewPassword} placeholder={t.result.newPassword} visible={false} onToggle={() => undefined} /><PasswordHint password={newPassword} /><Button className="w-full rounded-xl" type="submit" variant="outline">{t.result.changePassword}</Button><Button type="button" variant="ghost" onClick={logout} className="w-full gap-2 rounded-xl text-destructive hover:text-destructive"><LogOut className="h-4 w-4" />{t.result.logout}</Button></form>
       </div>
     </div>
   </div>;
